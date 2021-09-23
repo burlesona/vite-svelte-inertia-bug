@@ -2,14 +2,16 @@ const express = require('express');
 const inertia = require('inertia-node');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
+const fs = require('fs');
 
 const app = express();
 const port = 4000;
 const ASSET_VERSION = 1;
+const environment = process.env.ENV || 'development';
+console.log(`Running in ${environment}`);
 
-// Setup inertia layout
-// Don't bother making a "production" version because this
-// will never have a prod environment.
+// In development, fetch the index built by vite on localhost:3000.
+// In production, read it from dist.
 const html = (pageString, viewData) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -20,18 +22,32 @@ const html = (pageString, viewData) => `
     <!-- Custom data -->
     <title>${viewData.title}</title>
 
-    <!-- Serve front-end from Vite (this only works in local dev) -->
-    <script defer type="module" src="http://localhost:3000/@vite/client"></script>
-    <script defer type="module" src="http://localhost:3000/src/main.js"></script>
+    <!-- Assets -->
+    ${viteClientTag()}
+    ${mainScriptTag()}
   </head>
 
   <!-- The Inertia page object -->
   <body id="app" data-page='${pageString}'></body>
 </html>
 `;
-// Vite suggested tags...
-// <script defer type="module" src="localhost:3000/src/main.js"></script>
-// <link rel="stylesheet" href="localhost:3000/src/bundle.css" />
+
+function viteClientTag() {
+  if (environment === 'production') return '';
+  return `<script defer type="module" src="http://localhost:3000/@vite/client"></script>`;
+}
+
+function mainScriptTag() {
+  if (environment === 'production') {
+    // Read the manifest file and get it's import path
+    const raw = fs.readFileSync('dist/manifest.json', 'utf8')
+    const manifest = JSON.parse(raw);
+    return `<script defer type="module" src="${manifest['src/main.js']['file']}"></script>`
+  } else {
+    return `<script defer type="module" src="http://localhost:3000/src/main.js"></script>`;
+  }
+}
+
 
 // Yes I want to see request bodies }:|
 app.use(bodyParser.json());
@@ -40,7 +56,11 @@ app.use(bodyParser.json());
 app.use(inertia(html, ASSET_VERSION));
 
 // Serve static assets
-app.use(express.static('public'));
+if (environment === 'production') {
+  app.use(express.static('dist'));
+} else {
+  app.use(express.static('public'));
+}
 
 // Setup catalog and cart
 global.bikes = [
@@ -85,6 +105,11 @@ global.bikes = [
 global.cart = [
 
 ]
+
+app.use(({ Inertia }, _, next) => {
+  Inertia.shareProps({ username: "Mark Cavendish" })
+  next();
+});
 
 // GET /home
 app.get('/', (req, res) => {

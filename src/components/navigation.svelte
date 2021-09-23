@@ -1,5 +1,6 @@
 <script>
-  import { Link } from '@inertiajs/inertia-svelte'
+  import { page, Link } from '@inertiajs/inertia-svelte'
+  console.log($page)
 </script>
 
 <style>
@@ -12,4 +13,5 @@
   <Link href="/">Home</Link>
   <Link href="/bikes">Bikes</Link>
   <Link href="/cart">Cart</Link>
+  <p>$page has keys {Object.keys($page)}</p>
 </nav>
