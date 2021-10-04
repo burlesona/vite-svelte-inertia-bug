@@ -3,7 +3,7 @@
 To run in dev mode:
 
 1. `yarn install`
-2. In one terminal, `yarn vite dev`
+2. In one terminal, `yarn vite`
 3. In another terminal, `node app.js`
 4. Open the app at `localhost:4000`.
 
