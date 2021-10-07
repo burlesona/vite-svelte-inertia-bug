@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 
 const app = express();
-const port = 4000;
+const port = 8080;
 const ASSET_VERSION = 1;
 const environment = process.env.ENV || 'development';
 console.log(`Running in ${environment}`);
@@ -23,7 +23,7 @@ const html = (pageString, viewData) => `
     <title>${viewData.title}</title>
 
     <!-- Assets -->
-    ${viteClientTag()}
+ 
     ${mainScriptTag()}
   </head>
 
@@ -32,10 +32,10 @@ const html = (pageString, viewData) => `
 </html>
 `;
 
-function viteClientTag() {
-  if (environment === 'production') return '';
-  return `<script defer type="module" src="http://localhost:3000/@vite/client"></script>`;
-}
+// function viteClientTag() {
+//   if (environment === 'production') return '';
+//   return `<script defer type="module" src="http://localhost:3000/@vite/client"></script>`;
+// }
 
 function mainScriptTag() {
   if (environment === 'production') {
@@ -44,7 +44,7 @@ function mainScriptTag() {
     const manifest = JSON.parse(raw);
     return `<script defer type="module" src="${manifest['src/main.js']['file']}"></script>`
   } else {
-    return `<script defer type="module" src="http://localhost:3000/src/main.js"></script>`;
+    return `<script defer type="module" src="http://localhost:8080/src/main.js"></script>`;
   }
 }
 
@@ -59,7 +59,7 @@ app.use(inertia(html, ASSET_VERSION));
 if (environment === 'production') {
   app.use(express.static('dist'));
 } else {
-  app.use(express.static('public'));
+  app.use(express.static('dist'));
 }
 
 // Setup catalog and cart

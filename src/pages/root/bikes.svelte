@@ -7,7 +7,7 @@
   // Imports
   import { afterUpdate } from 'svelte'
   import { inertia, Link } from '@inertiajs/inertia-svelte'
-  import Navigation from '@/components/navigation.svelte'
+  import Navigation from '../../components/navigation.svelte'
 
   export function bikeData(bike) {
     return { id: bike.id };
